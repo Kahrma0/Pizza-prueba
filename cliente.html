@@ -1,0 +1,276 @@
+<!-- cliente.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sección Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+        .product-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px auto;
+            width: 80%;
+            max-width: 300px;
+            background-color: white;
+        }
+        #cart {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 90px; /* límite inferior */
+            max-height: 50vh; /* límite superior */
+            background-color: white;
+            border-top: 1px solid #ccc;
+            box-sizing: border-box;
+            overflow-y: auto;
+            transition: height 0.3s ease;
+            z-index: 10;
+        }
+
+        #cart.expanded {
+            height: 50vh;
+        }
+        #cart-header {
+            background-color: #ddd;
+            padding: 5px;
+            text-align: center;
+        }
+        
+        #ventanilla-btn {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+
+        #cart-items {
+            margin-top: 10px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .remove-btn {
+            color: red;
+            cursor: pointer;
+        }
+        #cart-footer {
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+            padding: 10px 0;
+            border-top: 1px solid #ccc;
+        }
+        #total {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #buy-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            padding-top: 40vh;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sección Cliente</h1>
+    <div class="product-card">
+        <h2>Producto 1</h2>
+        <p>Precio: $10</p>
+        <button onclick="addToCart('Producto 1', 10)">Agregar al Carrito</button>
+    </div>
+    <div class="product-card">
+        <h2>Producto 2</h2>
+        <p>Precio: $20</p>
+        <button onclick="addToCart('Producto 2', 20)">Agregar al Carrito</button>
+    </div>
+    <div class="product-card">
+        <h2>Producto 3</h2>
+        <p>Precio: $30</p>
+        <button onclick="addToCart('Producto 3', 30)">Agregar al Carrito</button>
+    </div>
+
+    <div id="cart-header">
+        <button id="ventanilla-btn">ventanilla</button>
+        <div id="cart-items"></div>
+        <div id="cart-footer">
+            <div id="total">Total: $0</div>
+            <button id="buy-btn" onclick="buy()">Comprar</button>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="resetCart()"></div>
+
+    <button onclick="goBack()">Volver al Menú</button>
+
+    <script>
+        let cartItems = [];
+        let startY = 0;
+        let isDragging = false;
+
+        const cart = document.getElementById('cart');
+        const cartHeader = document.getElementById('cart-header');
+
+        const COLLAPSED_HEIGHT = 90;
+        const EXPANDED_HEIGHT = window.innerHeight * 0.5;
+
+        function addToCart(name, price) {
+            cartItems.push({ name, price });
+            updateCart();
+        }
+
+        function removeFromCart(index) {
+            cartItems.splice(index, 1);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartItemsDiv = document.getElementById('cart-items');
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            cartItems.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.innerHTML = `
+                    <span>${item.name} - $${item.price}</span>
+                    <span class="remove-btn" onclick="removeFromCart(${index})">X</span>
+                `;
+                cartItemsDiv.appendChild(itemDiv);
+                total += item.price;
+            });
+            document.getElementById('total').textContent = `Total: $${total}`;
+        }
+
+        function buy() {
+    if (cartItems.length === 0) {
+        alert('El carrito está vacío.');
+        return;
+    }
+
+    const cliente = prompt('Nombre o mote del cliente:');
+    if (!cliente) return;
+
+    const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    const numbers = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const code = letter + numbers;
+
+    const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+
+    pedidos.push({
+        codigo: code,
+        cliente: cliente,
+        fecha: new Date().toLocaleString(),
+        productos: cartItems
+    });
+
+    localStorage.setItem('pedidos', JSON.stringify(pedidos));
+
+    document.getElementById('overlay').textContent = `Código de compra: ${code}`;
+    document.getElementById('overlay').style.display = 'block';
+}
+
+
+        function resetCart() {
+            cartItems = [];
+            updateCart();
+            document.getElementById('cart-items').style.display = 'block';
+            document.getElementById('cart-footer').style.display = 'block';
+            document.getElementById('overlay').style.display = 'none';
+            cart.classList.remove('expanded');
+            cart.style.height = '100px';
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+// BOTÓN "VENTANILLA"
+ventanillaBtn.addEventListener('click', () => {
+    cart.classList.toggle('expanded');
+});
+
+// TOUCH
+cart.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+});
+
+cart.addEventListener('touchmove', e => {
+    const currentY = e.touches[0].clientY;
+    const diff = startY - currentY;
+
+    if (diff > 60) {
+        cart.classList.add('expanded');
+    } else if (diff < -60) {
+        cart.classList.remove('expanded');
+    }
+});
+
+// MOUSE
+cart.addEventListener('mousedown', e => {
+    startY = e.clientY;
+    isDragging = true;
+});
+
+document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+
+    const diff = startY - e.clientY;
+
+    if (diff > 60) {
+        cart.classList.add('expanded');
+        isDragging = false;
+    } else if (diff < -60) {
+        cart.classList.remove('expanded');
+        isDragging = false;
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+    </script>
+</body>
+</html>

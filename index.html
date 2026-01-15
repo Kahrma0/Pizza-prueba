@@ -1,0 +1,128 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Página Principal</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            cursor: pointer; /* Para indicar que es clickable */
+        }
+        .section {
+            display: none;
+        }
+        #menu {
+            display: block;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #empleado-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu" class="section">
+        <h1 id="title">Mi Página Principal</h1>
+        <button id="cliente-btn">Cliente</button>
+        <button id="empleado-btn">Empleado</button>
+    </div>
+
+    <div id="empleado" class="section">
+        <h1>Sección Empleado</h1>
+        <p>Contenido para empleados.</p>
+        <button onclick="window.location.href='pedidos.html'">pedidos</button>
+        <button id="opcion2-btn">Opción 2</button>
+        <button onclick="goToMenu()">Volver al Menú</button>
+    </div>
+
+    <div id="opcion1" class="section">
+        <h1>Opción 1</h1>
+        <p>Contenido de la Opción 1.</p>
+        <button onclick="goToEmpleado()">Volver a Empleado</button>
+    </div>
+
+    <div id="opcion2" class="section">
+        <h1>Opción 2</h1>
+        <p>Contenido de la Opción 2.</p>
+        <button onclick="goToEmpleado()">Volver a Empleado</button>
+    </div>
+
+    <script>
+        let tapCount = 0;
+        document.getElementById('title').addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Para toques seguros
+            tapCount++;
+            if (tapCount === 5) {
+                document.getElementById('empleado-btn').style.display = 'block';
+                tapCount = 0; // Resetear contador
+            }
+        });
+
+        document.getElementById('cliente-btn').addEventListener('click', function() {
+            window.location.href = 'cliente.html';
+        });
+
+        document.getElementById('empleado-btn').addEventListener('click', function() {
+            let code = prompt('Ingrese el código para acceder:');
+            if (code === '123') {
+                showSection('empleado');
+            } else {
+                alert('Código incorrecto.');
+            }
+        });
+
+        document.getElementById('opcion1-btn').addEventListener('click', function() {
+            showSection('opcion1');
+        });
+
+        document.getElementById('opcion2-btn').addEventListener('click', function() {
+            showSection('opcion2');
+        });
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(function(section) {
+                section.style.display = 'none';
+            });
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function goToMenu() {
+            showSection('menu');
+            // Ocultar botón empleado al volver
+            document.getElementById('empleado-btn').style.display = 'none';
+        }
+
+        function goToEmpleado() {
+            showSection('empleado');
+        }
+
+        // Registro del Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registrado con éxito:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
